@@ -3,6 +3,7 @@ import React from 'react'
 import { useRouter } from 'next/router'
 import appConfig from '../config.json'
 import { ButtonSendSticker } from '../src/components/SendButtonSticker'
+
 import {
   createClient,
   RealtimeClient,
@@ -60,6 +61,22 @@ export default function ChatPage() {
     setMensagem('')
   }
 
+  async function deletarMensagem(mensagemId) {
+    await supabaseClient
+    .from('mensagens')
+    .delete()
+    .match({ id: mensagemId });
+    console.log(data);
+
+    const {data} = await supabaseClient
+        .from('mensagens')
+        .select('*')
+        .order('id', {ascending: false})
+        setListaDeMensagens([
+            ...data,
+        ]);
+}
+
   return (
     <Box
       styleSheet={{
@@ -102,7 +119,7 @@ export default function ChatPage() {
             padding: '16px'
           }}
         >
-          <MessageList mensagens={listaDeMensagens} />
+          <MessageList mensagens={listaDeMensagens} onMessageDelete={deletarMensagem} />
 
           {/* {listaDeMensagens.map(mensagemAtual => {
             return (
@@ -144,6 +161,13 @@ export default function ChatPage() {
                 color: appConfig.theme.colors.neutrals[200]
               }}
             />
+           <Button
+              label='Enviar'
+              onClick={() => {
+              handleNovaMensagem(mensagem);                            
+                            }}
+              
+              />
             <ButtonSendSticker
               onStickerClick={sticker => {
                 // console.log('[USANDO O COMPONENTE] Salva esse sticker no banco', sticker);
@@ -253,6 +277,28 @@ function MessageList(props) {
             ) : (
               mensagem.texto
             )}
+
+          <Button 
+                            label='x'
+                            styleSheet={{
+                                textAlign: 'left',
+                                marginLeft: '95%',
+                                borderRadius: '50%',
+                                padding: '0',
+                                padding: 0,
+                                width: '30px',
+                                height: '30px'
+                            }}
+                            buttonColors={{
+                                contrastColor: appConfig.theme.colors.neutrals["000"],
+                                mainColor: appConfig.theme.colors.primary[500],
+                                mainColorLight: appConfig.theme.colors.primary[400],
+                                mainColorStrong: appConfig.theme.colors.primary[600],
+                            }}
+                            onClick={() => {
+                                props.onMessageDelete(mensagem.id);
+                            }}
+                        />
           </Text>
         )
       })}
